@@ -45,13 +45,20 @@ class ProductsProvider with ChangeNotifier {
     return [..._items];
   }
 
-  void addProduct(Product value) {
-    _items.add(value);
+  void addProduct(Product product) {
+    final newProduct = Product(
+      id: product.id,
+      title: product.title,
+      description: product.description,
+      imageUrl: product.imageUrl,
+      price: product.price,
+    );
+    _items.add(newProduct);
     notifyListeners();
   }
 
-  List<Product> get favoriteItems{
-    return _items.where((product)=>product.isFavorite).toList();
+  List<Product> get favoriteItems {
+    return _items.where((product) => product.isFavorite).toList();
   }
 
   Product findProductById(String productId) {
