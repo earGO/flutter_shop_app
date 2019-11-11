@@ -15,19 +15,47 @@ class _EditProductState extends State<EditProduct> {
   final _imageUrlController = TextEditingController();
   final _imageUrlFocusNode = FocusNode();
   final _formGlobalKey = GlobalKey<FormState>();
+  var _isInit = true;
   var _newUserProduct = Product(
-    id: DateTime.now().toString(),
+    id: null,
     title: '',
     imageUrl: '',
     price: 0.0,
     description: '',
-    isFavorite: false,
   );
+  var _initValues = {
+    'title': '',
+    'description': '',
+    'price': '',
+    'imageUrl': '',
+  };
 
   @override
   void initState() {
     super.initState();
     _imageUrlFocusNode.addListener(_updateImageUrl);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isInit) {
+      final productId = ModalRoute.of(context).settings.arguments as String;
+      if (productId != null) {
+        _newUserProduct = Provider.of<ProductsProvider>(context, listen: false)
+            .findProductById(productId);
+        _initValues = {
+          'title': _newUserProduct.title,
+          'description': _newUserProduct.description,
+          'price': _newUserProduct.price.toString(),
+          'imageUrl': '',
+          'id': _newUserProduct.id,
+          'isFavorite': _newUserProduct.isFavorite,
+        };
+        _imageUrlController.text = _newUserProduct.imageUrl;
+      }
+    }
+    _isInit = false;
   }
 
   @override
@@ -42,22 +70,25 @@ class _EditProductState extends State<EditProduct> {
 
   void _updateImageUrl() {
     if (_imageUrlFocusNode.hasFocus) {
-      var url = _imageUrlController.text;
-      if (!url.isEmpty ||
-          url.startsWith('http') ||
-          url.startsWith('https') ||
-          (!url.endsWith('.png') &&
-              !url.endsWith('.jpg') &&
-              !url.endsWith('.jpeg'))) {
-        setState(() {});
+      if ((!_imageUrlController.text.startsWith('http') &&
+          !_imageUrlController.text.startsWith('https')) ||
+          (!_imageUrlController.text.endsWith('.png') &&
+              !_imageUrlController.text.endsWith('.jpg') &&
+              !_imageUrlController.text.endsWith('.jpeg'))) {
+        return;
       }
+      setState(() {});
     }
   }
 
   void _saveForm() {
     if (_formGlobalKey.currentState.validate()) {
       _formGlobalKey.currentState.save();
-      Provider.of<ProductsProvider>(context).addProduct(_newUserProduct);
+      if (_newUserProduct.id != null) {
+        Provider.of<ProductsProvider>(context).editProduct(_newUserProduct);
+      } else {
+        Provider.of<ProductsProvider>(context).addProduct(_newUserProduct);
+      }
     }
   }
 
@@ -83,6 +114,7 @@ class _EditProductState extends State<EditProduct> {
           child: ListView(
             children: <Widget>[
               TextFormField(
+                initialValue: _initValues['title'],
                 decoration: InputDecoration(labelText: 'Title'),
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (value) {
@@ -101,11 +133,12 @@ class _EditProductState extends State<EditProduct> {
                     description: _newUserProduct.description,
                     id: _newUserProduct.id,
                     imageUrl: _newUserProduct.imageUrl,
-                    isFavorite: false,
+                    isFavorite: _newUserProduct.isFavorite,
                   )
                 },
               ),
               TextFormField(
+                initialValue: _initValues['price'],
                 decoration: InputDecoration(labelText: 'Price'),
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.number,
@@ -132,11 +165,12 @@ class _EditProductState extends State<EditProduct> {
                     description: _newUserProduct.description,
                     id: _newUserProduct.id,
                     imageUrl: _newUserProduct.imageUrl,
-                    isFavorite: false,
+                    isFavorite: _newUserProduct.isFavorite,
                   )
                 },
               ),
               TextFormField(
+                initialValue: _initValues['description'],
                 decoration: InputDecoration(labelText: 'Description'),
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
@@ -157,7 +191,7 @@ class _EditProductState extends State<EditProduct> {
                     description: value,
                     id: _newUserProduct.id,
                     imageUrl: _newUserProduct.imageUrl,
-                    isFavorite: false,
+                    isFavorite: _newUserProduct.isFavorite,
                   )
                 },
               ),
@@ -216,7 +250,7 @@ class _EditProductState extends State<EditProduct> {
                           description: _newUserProduct.description,
                           id: _newUserProduct.id,
                           imageUrl: value,
-                          isFavorite: false,
+                          isFavorite: _newUserProduct.isFavorite,
                         )
                       },
                     ),

@@ -57,6 +57,18 @@ class ProductsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void editProduct(Product product){
+    final editedId = product.id;
+    final editedProductIndex = _items.indexWhere((product)=>product.id==editedId);
+    if(editedProductIndex!=null){
+      _items[editedProductIndex] = product;
+    } else {
+      return;
+    }
+    notifyListeners();
+
+  }
+
   List<Product> get favoriteItems {
     return _items.where((product) => product.isFavorite).toList();
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_complete_guide/screens/edit_product.dart';
+import 'package:flutter_complete_guide/widgets/app_drawer.dart';
 import 'package:provider/provider.dart';
 import '../provider/products_provider.dart';
 import '../widgets/user_product_item.dart';
@@ -30,9 +31,11 @@ class UserProducts extends StatelessWidget {
           itemBuilder: (ctx, i) => UserProductItem(
             title: productsData.items[i].title,
             imageUrl: productsData.items[i].imageUrl,
+            id:productsData.items[i].id,
           ),
         ),
       ),
+      drawer: AppDrawer(),
     );
   }
 }
